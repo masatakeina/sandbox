@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>カード作成</title>
+    <link rel="manifest" href="/manifest.json">
+    <style>
+        body { font-family: sans-serif; margin: 20px; background-color: #f4f4f4; }
+        .container { background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h1 { color: #333; }
+        label { display: block; margin-top: 10px; margin-bottom: 5px; color: #555; }
+        select, textarea, input[type="text"] { width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+        textarea { min-height: 100px; }
+        .design-options { display: flex; gap: 10px; margin-bottom: 15px; }
+        .design-options label { display: flex; flex-direction: column; align-items: center; cursor: pointer; }
+        .design-options img { width: 80px; height: 80px; border: 2px solid transparent; border-radius: 4px; }
+        .design-options input[type="radio"]:checked + img { border-color: #007bff; }
+        .button {
+            display: inline-block;
+            padding: 10px 15px;
+            margin-top: 20px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+        }
+        .button:hover { background-color: #0056b3; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>メッセージカードを作成</h1>
+        <form id="createCardForm" action="/send_card" method="POST">
+            <div>
+                <label for="receiver_id">送信相手:</label>
+                <select name="receiver_id" id="receiver_id" required>
+                    <!-- オプションはJavaScriptで生成されます -->
+                </select>
+            </div>
+
+            <div>
+                <label>カードデザイン:</label>
+                <div class="design-options">
+                    <label>
+                        <input type="radio" name="design_id" value="design1" checked>
+                        <img src="/images/design1.png" alt="Design 1">
+                        Design 1
+                    </label>
+                    <label>
+                        <input type="radio" name="design_id" value="design2">
+                        <img src="/images/design2.png" alt="Design 2">
+                        Design 2
+                    </label>
+                    <!-- 他のデザインも同様に追加可能 -->
+                </div>
+            </div>
+
+            <div>
+                <label for="message">メッセージ:</label>
+                <textarea name="message" id="message" rows="4"></textarea>
+            </div>
+
+            <input type="hidden" name="sender_id" id="sender_id">
+
+            <button type="submit" class="button">送信</button>
+            <a href="/" class="button" style="background-color: #6c757d;">キャンセル</a>
+        </form>
+    </div>
+
+    <script>
+        // このJSONデータはサーバーサイドでレンダリング時に設定されます
+        const serverData = {
+            currentUserId: '', // 例: 'user1'
+            allUsers: []    // 例: ['user1', 'user2', 'user3']
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const currentUserId = serverData.currentUserId;
+            const allUsers = serverData.allUsers;
+
+            const senderIdInput = document.getElementById('sender_id');
+            if (currentUserId) {
+                senderIdInput.value = currentUserId;
+            }
+
+            const receiverSelect = document.getElementById('receiver_id');
+            if (allUsers && receiverSelect) {
+                allUsers.forEach(userId => {
+                    if (userId !== currentUserId) { // 自分自身を送信相手のリストから除外
+                        const option = document.createElement('option');
+                        option.value = userId;
+                        option.textContent = userId;
+                        receiverSelect.appendChild(option);
+                    }
+                });
+                if (receiverSelect.options.length === 0) {
+                    const option = document.createElement('option');
+                    option.textContent = '送信可能な相手がいません';
+                    option.disabled = true;
+                    receiverSelect.appendChild(option);
+                    document.querySelector('button[type="submit"]').disabled = true;
+                }
+            }
+        });
+    </script>
+</body>
+</html>

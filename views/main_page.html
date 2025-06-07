@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>メッセージカード</title>
+    <link rel="manifest" href="/manifest.json">
+    <style>
+        body { font-family: sans-serif; margin: 20px; background-color: #f4f4f4; }
+        .container { background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h1 { color: #333; }
+        .card-list { margin-top: 20px; }
+        .card-item { border: 1px solid #ddd; border-radius: 4px; padding: 15px; margin-bottom: 15px; background-color: #f9f9f9; }
+        .card-item h3 { margin-top: 0; color: #555; }
+        .card-item img { max-width: 100px; max-height: 100px; border: 1px solid #ccc; display: block; margin-top: 10px; }
+        .no-cards { color: #777; }
+        .button {
+            display: inline-block;
+            padding: 10px 15px;
+            margin-top: 20px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .button:hover { background-color: #0056b3; }
+        .user-info { margin-bottom: 20px; padding: 10px; background-color: #e9ecef; border-radius: 4px;}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="user-info">
+            <p>ユーザーID: <span id="userId"></span></p>
+        </div>
+
+        <h1>受信カード</h1>
+        <div id="card-list" class="card-list">
+            <!-- カードはここにJavaScriptで挿入されます -->
+        </div>
+        <div id="no-cards-message" class="no-cards" style="display: none;">
+            <p>受信カードはありません。</p>
+        </div>
+
+        <a href="/create" class="button">カードを作成する</a>
+    </div>
+
+    <script>
+        // このJSONデータはサーバーサイドでレンダリング時に設定されます
+        const serverData = {
+            userId: '', // サーバーからユーザーIDをセット
+            cards: []   // サーバーからカードのリストをセット
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const userIdElement = document.getElementById('userId');
+            const cardListElement = document.getElementById('card-list');
+            const noCardsMessageElement = document.getElementById('no-cards-message');
+
+            // サーバーから渡されたデータを取得 (実際にはindex.jsでこのデータをHTMLに埋め込む)
+            // 例: const embeddedData = JSON.parse(document.getElementById('server-data').textContent);
+            // この例では serverData オブジェクトを直接使いますが、実際はHTMLに埋め込む必要があります。
+
+            // このデモでは、index.jsがこのHTMLを返す際に、<script>ブロック内で
+            // serverData.userId と serverData.cards を動的に設定することを想定しています。
+            // 例:
+            // <script>
+            //  const serverData = {
+            //      userId: "${userId}", // Expressのテンプレートエンジン等で置換
+            //      cards: ${JSON.stringify(cards)} // Expressのテンプレートエンジン等で置換
+            //  };
+            // </script>
+            // 今回はテンプレートエンジンを使わないため、index.js側でHTML文字列を生成する際にこの部分を置換します。
+
+
+            if (serverData.userId) {
+                userIdElement.textContent = serverData.userId;
+            } else {
+                userIdElement.textContent = 'N/A';
+            }
+
+            if (serverData.cards && serverData.cards.length > 0) {
+                serverData.cards.forEach(card => {
+                    const cardItem = document.createElement('div');
+                    cardItem.className = 'card-item';
+
+                    const senderElement = document.createElement('h3');
+                    senderElement.textContent = `差出人: ${card.sender_id}`;
+
+                    const messageElement = document.createElement('p');
+                    messageElement.textContent = card.message || 'メッセージはありません';
+
+                    const designElement = document.createElement('img');
+                    designElement.src = `/images/${card.design_id}.png`; // public/images 以下を指す
+                    designElement.alt = `デザイン: ${card.design_id}`;
+
+                    cardItem.appendChild(senderElement);
+                    cardItem.appendChild(messageElement);
+                    cardItem.appendChild(designElement);
+                    cardListElement.appendChild(cardItem);
+                });
+            } else {
+                noCardsMessageElement.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>
