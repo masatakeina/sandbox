@@ -42,7 +42,7 @@
             <p>受信カードはありません。</p>
         </div>
 
-        <a href="/create" class="button">カードを作成する</a>
+        <a href="/create" id="createCardButton" class="button">カードを作成する</a>
     </div>
 
     <script>
@@ -101,6 +101,11 @@
                 });
             } else {
                 noCardsMessageElement.style.display = 'block';
+            }
+
+            const createCardButton = document.getElementById('createCardButton');
+            if (serverData.userId && createCardButton) {
+                createCardButton.href = `/create?userId=${encodeURIComponent(serverData.userId)}`;
             }
         });
     </script>
